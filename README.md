@@ -1,4 +1,4 @@
-# Typescript
+#Typescript für Einsteiger
 Dieses Dokument soll die Grundlagen von Typescript darstellen und ihre Anwendungsfälle.
 
 Kurz was zu meiner Person: Ich bin seit 5 Jahren (2015) PHP Entwickler. Eine Programmiersprache die sich auch lange Zeit mit Typisierung schwer getan hat. Aber ich habe auch Erfahrungen mit typisierten Sprachen wie C++ und Java und kann sagen, typensichere Programmierung hat mehr Vorteile als Nachteile.
@@ -85,14 +85,16 @@ Also der Fehler der mit Javascript erst durch ausführen der Funktion mit `y` gl
 Zum Beispiel wenn wir die Funktion `add` mit einem String aufrufen kommt folgender Fehler: `Argument of type '"1"' is not assignable to parameter of type 'number'.` Das macht entwickeln ziemlich einfach.
 
 Aber was für Typen gibt es denn eigentlich?
-* `number` (Zahlen)
-* `string` (mit einzelnen und doppelte Anführungsstriche)
-* `object` (Damit meint man nur das leere Objekt)
-* `boolean` (`true` oder `false`)
-* `enum` (Im Prinzip sind das benannte Konstanten)
-* `void` (als Rückgabewert von Funktion heißt das "Diese Funktion gibt nichts zurück" das heißt auch dass man den Wert den die Funktion zurück gibt nicht verwenden kann.)
-* `Array` und `tuple` (Mehr dazu im Kapitel über Container Typen)
-* Konstante Literale sind auch erlaubt: `null`, `undefined`
+
+ * `number` (Zahlen)
+ * `string` (mit einzelnen und doppelte Anführungsstriche)
+ * `object` (Damit meint man nur das leere Objekt)
+ * `boolean` (`true` oder `false`)
+ * `enum` (Im Prinzip sind das benannte Konstanten)
+ * `void` (als Rückgabewert von Funktion heißt das "Diese Funktion gibt nichts zurück" das heißt auch dass man den Wert den die Funktion zurück gibt nicht verwenden kann.)
+ * `Array` und `tuple` (Mehr dazu im Kapitel über Container Typen)
+ * Konstante Literale sind auch erlaubt: `null`, `undefined`
+
 ```typescript
 function howOldAmI(age: 'old'|'young'|'very old'): string {
     return 'You are ' + age;
@@ -104,21 +106,14 @@ Besondere Typen:
 * `never`: Diese Funktion gibt nie irgendwas zurück, sondern schmeißt nur `Exception`s)
 * `any`: Wenn man den Type angeben will aber in explizit wage lässt.
 
-## Kapitel 3: Wie funktioniert das Typsystem
-Das Typsystem von Typescript bzw. Javascript damit indirekt auch ist strukturelle Typisierung oder auch [Duck-Typing](https://de.wikipedia.org/wiki/Duck-Typing) genannt. Hier mal ein Beispiel: Wir haben zwei Objekte, die beide die gleichen Methoden: Beide Objekte haben eine Methode `quack(): string`. Für Typescript sind diese typen-mäßig das gleiche Objekt. An einem praktischen Beispiel:
-```typescript
-function getSize(sizable): number {
-    return sizable.length;
-}
-```
-Was für ein Typ muss der Parameter `sizable` haben? Eigentlich ist das egal solange `sizable` eine Eigenschaft `length` besitzt die vom Typ `number` ist. Ein Beispiel für gültige Typen in dem Fall wäre `string` und `Array`. Wie wir dann unseren eigenen Typen definieren, der diese Information enthält sehen wir im nächsten Kapitel.
-
 Eine weitere Sache die noch wichtig zu verstehen ist, ist wo überall man Typen angeben kann:
-1. Beim definieren von Funktionen
+
+1\. Beim definieren von Funktionen
 ```typescript
 function name(parameter: any): any {}
 ```
-2. Beim definieren von Variablen (sinnvoll ist das meistens nur wenn die Variable später erst initialisiert wird).
+
+2\. Beim definieren von Variablen (sinnvoll ist das meistens nur wenn die Variable später erst initialisiert wird).
 ```typescript
 let a: number = 0;
 // und weiter unten im Code passiert.
@@ -126,42 +121,244 @@ if (a === 0) {
     a = 10;
 }
 ```
-3. Beim expliziten Anpassen von Typen, denn Typescript ist nicht immer perfekt im erahnen was für ein Typ eine Variable hat. Besonders wenn es Daten sind die über eine API kommen. Deswegen kann man in Typescript Variablen Typen zuweisen, die sie eigentlich gar nicht haben.
+3\. Beim expliziten Anpassen von Typen, denn Typescript ist nicht immer perfekt im erahnen was für ein Typ eine Variable hat. Besonders wenn es Daten sind die über eine API kommen. Deswegen kann man in Typescript Variablen Typen zuweisen, die sie eigentlich gar nicht haben.
 ```typescript
 let f = someExternalFunction() as string;
 ```
 Das setzt den Typ für die Variable `f` auf `string`. Sollte das nicht mit dem eigentlichen Rückgabewert übereinstimmen, ist das egal. Da beim Überführen des Typescript Codes zu reinem Javascript die Typen Definitionen weg gelassen werden.
 
+
+## Kapitel 3: Wie funktioniert das Typsystem
+Das Typsystem von Typescript bzw. Javascript damit indirekt auch ist strukturelle Typisierung oder auch [Duck-Typing](https://de.wikipedia.org/wiki/Duck-Typing) genannt.
+```typescript
+let test1 = { test: true }
+let test2 = { test: false }
+
+```
+Dann haben die beiden Objekte `test1` und `test2` den gleichen Typ, da beide die Eigenschaft `test` enthalten, die ein `boolean` ist. 
+
+Fügen wir nun dem Objekt `test2` eine Eigenschaft `num: number` hinzu, so ist `test2` "größer" als `test1`. Was bedeutet, überall wo `test1` erlaubt ist, ist auch `test2` erlaubt. Anders herum aber nicht, weil `test1` die Eigenschaft `num` fehlt.
+
+Wenn man sich das ganze in einer Klassenhierarchie vorstellt sieht das dann so aus:
+```typescript
+class Test1 {
+    test: boolean;
+}
+
+class Test2 extends Test1 {
+    num: number;
+}
+```
+Mehr zum Klassensyntax in Kapitel 5.
+
+Aber eine Sache die man bedenken muss ist, nicht überall ist es sinnvoll Typen anzugeben. Typescript hat, wie viele andere Programmiersprachen auch, die Möglichkeit Typen abzuleiten. Beispiel:
+```typescript
+function getNumber(): number {
+    return 0;
+}
+
+let f = getNumber();
+```
+In diesem Falle brauchen wir bei der Definition `let f:number = getNumber()` keinen Typ dran schreiben. Der Grund dafür ist, es ist für den Compiler klar, dass es eine `number` sein muss. Und `let f: string = getNumber()` wäre einfach falsch.
+
+Optionale Parameter und optionale Eigenschaften von Objekten können mit dem `:?` Syntax dargestellt werden. Das bedeutet eigentlich nur, dass dieser Parameter / Eigenschaft auch `undefined` sein kann.
+```typescript
+function 
+```
+
 ## Kapitel 4: Typen selber erstellen
-Typen kann man in Typescript überall definieren. Am Anfang der Datei oder direkt da wo sie gebraucht werden. Am besten eignen sich für Typen die man überall in dem Projekt braucht eine zentrale Datei. Eine sogenannte Definitionsdatei. Diese hat die Endung `.d.ts` und werden ganz einfach irgendwo hinlegen (es eignet sich ein Ort separat vom Code um es besser abgrenzen zu können).
+Typen kann man in Typescript überall definieren. Für zentrale Typen, die man überall in dem Projekt braucht eignet sich eine sogenannte [Definitionsdatei](https://www.typescriptlang.org/docs/handbook/declaration-files/by-example.html) mit der Endung `.d.ts`.
 
-Die einfachste Art einen Typ anzulegen ist eine Klasse zu definieren, denn jede Klasse ist ein Typ.
+#### Aus Klassen und Objekten
+Die einfachste Art einen Typ anzulegen ist eine Klasse zu definieren, denn jede Klasse ist ein Typ. Wenn man von einem bereits existierenden Objekt den Typ übernehmen will, kann man das machen mit dem `typeof` Schlüsselwort.
+```typescript
+let a = 10;
+let b: typeof a = 20;
+```
+Dann haben `a` und `b` beide den Typ (in diesem Fall `number`).
 
+### Union Types
 Eine weitere Möglichkeit ist es zwei oder mehrere existierende Typen zu verbinden. Dies nennt sich ein Union-Type. Hier ein Beispiel:
 ```typescript
 type numberLike = boolean|number;
 ```
-Das heißt eine Funktion mit diesem Parameter kann entweder mit jeder beliebigen Zahl aufgerufen werden oder mit einem `boolean`. Das ist aber ein eher seltener Fall.
+Das heißt eine Funktion mit diesem Parameter kann entweder mit jeder beliebigen Zahl aufgerufen werden oder mit einem `boolean`. Sollte dies als Typ eines Parameters einer Funktion gelten. Muss die Funktion für beide Typen "funktionieren". Dazu prüft Typescript die unterschiedlichen Pfade die Variablen in der Funktion nehmen können und prüft alle. Ein Beipsiel:
+```typescript
+function someFunction(a: string|number): void {
+    if (typeof(a) === 'string') {
+        // a ist ein String
+        console.log(a.length);
+    } else {
+        // a ist eine Zahl
+        console.log(a.toFixed(2));
+    }
+}
 
+someFunction("Hello");
+someFunction(10.224334);
+```
+Der Output ist einmal `5` und "10.22". Würden wir aber jetzt die beiden `console.log` Aufrufe tauschen, gibt Typescript den Fehler aus, dass es kein Property `length` auf number gibt und keine Funktion `toFixed` auf einem String. Wenn man dann eine IDE mit Vervollständigung hat, werden einem in den unterschiedlichen Zweigen der If-Abfrage auch für `a.` unterscheidliche Vorschläge angezeigt.
 
-[]
+### Interfaces
+Ein Interface ist ähnlich wie eine Klasse nur ohne eine gegeben Implementation. In einem Interface definiert man die Eigenschaften und Methoden die ein Objekt oder eine Klasse haben soll.
+```typescript
+interface Countable {
+    length: number;
+}
+
+function getLength(a: Countable): number {
+    return a.length;
+}
+
+const someObject: Countable = {
+    length: 10
+}
+
+console.log(getLength(someObject));
+```
+Dieses Programm schreibt `10` in die Konsole. Dies mag zwar auf den ersten Blick nicht sehr sinnvoll aussehen und man fragt sich warum man das machen sollte, das ist bei APIs ziemlich hilfreich. Mehr dazu in Kapitel 6.
 
 ## Kapitel 5: Erweiterung des Klassensyntax
-Der nächst-einfachere Variante ist eine Klasse. Wie schon im ES6 Standard enthalten hat Javascript einen Klassen Syntax.
+Wie schon im ES6 Standard enthalten hat Javascript einen Klassen Syntax.
 ```typescript
-class Ente {
-    public construct() {
-
-    }
-
+class Duck {
     public quack(): void {
         console.log("Quack");
     }
 }
 ```
 Da hat sich mit Typescript aber auch noch etwas geändert: Wie in vielen anderen Programmiersprachen auch haben Methoden und Eigenschaften in einer Klasse jetzt Zugriffsmodifikatoren. `public`, `protected` und `private`:
+
 * `public`: Jeder hat auf die Methode bzw. Eigenschaft Zugriff.
 * `protected`: Wenn eine Klasse erbt, dann hat sie Zugriff auf die `protected` Eigenschaften und Methoden der Kind Klasse, aber kein anderer.
 * `private`: Nur Funktionen und Methoden innerhalb der gleichen Klasse haben Zugriff auf die Eigenschaften und Methoden.
 
-[]
+Eine weiter Änderung in Typescript erfordert das Definieren von Eigenschaften in einer Klasse ähnlich wie bei dem `Interface`:
+```typescript
+class Car {
+    private brand: string;
+    private horsePower: number;
+}
+```
+`Private` Instanzvariablen müssen im `constructor` gesetzt werden. Das kann man auf zwei Arten machen:
+```typescript
+// Alle Eigenschaften einzeln
+class Car {
+    private brand: string;
+    private horsePower: number;
+
+    public constructor(brand: string, horsePower: number) {
+        this.brand = brand;
+        this.horsePower = horsePower;
+    }
+}
+
+// Da das häufig passiert gibt es dafür eine kürzere Variante
+class Car {
+    public constructor(
+        private brand: string,
+        private horsePower: number
+    ) { }
+}
+```
+Das Konzept von "Eigenschaften müssen im Vorfeld bekannt sein" ändert ein Stück weit auch das Objektmodel. Nun ist es nicht mehr möglich ist neue Eigenschaften dynamisch hinzufügen, zumindest nicht direkt.
+```typescript
+class AllObjects{
+    [key: string]: any;
+
+    // Rest der Klasse hier
+}
+```
+Was das bedeutet, ist außerhalb der Grundlagen und deswegen [hier](https://www.typescriptlang.org/docs/handbook/advanced-types.html#index-types) nur ein Link zu der Dokumentation von Typescript wie Index-Typen funktionieren.
+> Die vereinfachte Variante ist: In Javascript erlaubt damit `object['property']` zu sagen solange das in den eckigen Klammern vom Typ `string` ist, der Typ von dem Ausdruck ist dann `any`.
+
+Eine weiter ziemlich hilfreiche Funktion ist Eigenschaften `readonly` zu machen. Das bedeutet, dass man die ein Mal setzen kann und danach nur noch lesen (ähnlich wie eine Konstante).
+```typescript
+class SomeClass {
+    constructor(
+        public readonly test: boolean
+    ) {}
+}
+
+let a = new SomeClass(false);
+a.test = false;
+```
+Gibt uns folgenden Fehler: `Cannot assign to 'test' because it is a read-only property.`
+
+## Kapitel 6: Anwendungsbeispiele
+Hier sind zwei mögliche Anwendungsbeispiele:
+
+### Typisierte API Antworten
+Im folgenden ein Beispiel was verdeutlicht, wie Typescript beim verwenden von APIs behilflich ist.
+```typescript
+interface User {
+    name: string,
+    roles: string[], // Ein Array von Strings
+    age: number,
+    isAdmin: boolean
+}
+
+interface ApiResponse {
+    users: User[] // Ein Array von Usern
+}
+
+fetch('https://some-url-that-does-return-stuff.com/users')
+    .then(response => response.json())
+    .then((data: ApiResponse) => {
+        // Die Logik hier!
+    })
+```
+In diesem Beispiel wird die [Fetch Funktion](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) verwendet. Aber nichts desto trotz ohne die eigentliche API je gesehen zu haben kann man jetzt Typen-sicher programmieren mit Autovervollständigung. Und wenn man das zentral in einer Typ-Datei speichert, hat man auf diese Typen im ganzen Projektzugriff.
+
+### Typescript hat auch Types für DOM-Objekte
+Ein weiteres Beispiel für Hilfe bei der DOM Manipulation:
+```typescript
+const element = document.getElementById('someId');
+```
+Diese Konstante hat jetzt den Typ `HTMLElement|null` weil es kann sein, dass das Element nicht existiert. Wenn wir die Möglichkeit ignorieren möchten schreiben wir folgendes:
+```typescript
+const element = document.getElementById('someId') as HTMLElement;
+```
+Damit geben wir den Typ des Ausdrucks auf der rechten Seite vor. Das ganze Beispiel ist folgendes:
+```typescript
+const element = document.getElementById('someId') as HTMLElement;
+element.style = {position: "absolute", height: "100px", width: "10px"};
+```
+In Javascript wäre das kein Problem. Aber es macht nicht dass was es soll. Das Element hat kein neuen Style. Die Fehlermeldung von Typescript sagt warum: `Cannot assign to 'style' because it is a read-only property.`
+
+### Anwendungsfall für `Enum`s
+Ein guter Anwendungsfall für ein `Enum` sind unterschiedliche Zustände zum Beispiel für eine Ampel.
+```typescript
+enum TrafficLightState {
+    RED, YELLOW, GREEN
+}
+```
+Damit brauch man sich nicht auf magische Konstanten zu verlassen und auch nicht auf string Vergleiche. Ein Anwendungsfall wäre zum Beispiel folgendes:
+```typescript
+function canICrossTheStreet(traficLight: TrafficLightState): string
+{
+    switch(traficLight)
+    {
+        case TrafficLightState.GREEN:
+            return "Jap, einfach drüber";
+        case TrafficLightState.YELLOW:
+            return "Eigentlich nicht aber macht sowieso jeder";
+        case TrafficLightState.RED:
+            return "Nein";
+    }
+}
+console.log(canICrossTheStreet(TrafficState.GREEN));
+```
+Diese Funktion gibt nun zu jedem Zustand der Ampel einen String aus. Es gibt nun immer noch die Möglichkeit direkt die Zahl rein zu geben, aber davon wird abgeraten.
+
+## Kapitel 7: Weiterführende Themen
+Typescript kann natürlich noch so viel mehr als das was gerade beschrieben wurde. Ein paar der etwas komplizierteren Themen sollen hier nur mal kurz angeschnitten werden.
+
+### Template Types aka. Generics
+
+### Iterator und Generator
+
+### Decorators
+
+## Kapitel 8: Schlusswort
+
