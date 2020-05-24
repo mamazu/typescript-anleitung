@@ -62,7 +62,7 @@ Aber allgemein beleibt dann immer noch Problem Nummer 2: Wir können nicht von a
 ## Kapitel 2: Erste Schritte mit Typescript
 Für die Leute, die ein bisschen mit Typescript experimentieren wollen: [Hier ist die Sandbox](https://www.typescriptlang.org/play/)
 
-Wir werden in diesem Dokument nicht darauf eingehen wie man Typescript in jeweilige Projekte integriert. In vielen Frameworks ist es schon drin und in selbstgebauten Projekten eignet sich ein Compiler wie Babel oder ähnliches dafür.
+Wir werden in diesem Dokument nicht darauf eingehen wie man Typescript in jeweilige Projekte integriert. In vielen Frameworks ist es schon drin und in selbstgebauten Projekten eignet sich ein Compiler wie Babel oder ähnliches dafür. Aber da Typescript den Javascript Syntax erweitert ist es kein Problem den Typescript Compiler über ein Javascript Projekt laufen zu lassen. Damit hat man nur nicht viel erreicht, weil in Javascript nur sehr wenig Typisierungsinformation gesammelt werden kann. Das Typescript aber auch Javascript Dateien im Projekt erlaubt macht die Migration eines existierenden Projekts einfacher.
 
 Um die Funktion von dem vorherigen Kapitel wieder aufzugreifen, so würde sie in Typescript aussehen:
 ```typescript
@@ -92,7 +92,13 @@ Aber was für Typen gibt es denn eigentlich?
 * `enum` (Im Prinzip sind das benannte Konstanten)
 * `void` (als Rückgabewert von Funktion heißt das "Diese Funktion gibt nichts zurück" das heißt auch dass man den Wert den die Funktion zurück gibt nicht verwenden kann.)
 * `Array` und `tuple` (Mehr dazu im Kapitel über Container Typen)
-* Konstante Literale sind auch erlaubt: `null`, `undefined` (Mehr dazu in Kapitel 4
+* Konstante Literale sind auch erlaubt: `null`, `undefined`
+```typescript
+function howOldAmI(age: 'old'|'young'|'very old'): string {
+    return 'You are ' + age;
+}
+```
+Das heißt gültige Werte für diese Funktion sind der String "old", "young" oder "very old" und kein anderer `String`.
 
 Besondere Typen:
 * `never`: Diese Funktion gibt nie irgendwas zurück, sondern schmeißt nur `Exception`s)
@@ -124,6 +130,38 @@ if (a === 0) {
 ```typescript
 let f = someExternalFunction() as string;
 ```
-Das setzt den Typ für die Variable `f` auf `string`. Sollte das nicht mit dem eigentlichen Rückgabewert übereinstimmen, ist das egal.
+Das setzt den Typ für die Variable `f` auf `string`. Sollte das nicht mit dem eigentlichen Rückgabewert übereinstimmen, ist das egal. Da beim Überführen des Typescript Codes zu reinem Javascript die Typen Definitionen weg gelassen werden.
 
 ## Kapitel 4: Typen selber erstellen
+Typen kann man in Typescript überall definieren. Am Anfang der Datei oder direkt da wo sie gebraucht werden. Am besten eignen sich für Typen die man überall in dem Projekt braucht eine zentrale Datei. Eine sogenannte Definitionsdatei. Diese hat die Endung `.d.ts` und werden ganz einfach irgendwo hinlegen (es eignet sich ein Ort separat vom Code um es besser abgrenzen zu können).
+
+Die einfachste Art einen Typ anzulegen ist eine Klasse zu definieren, denn jede Klasse ist ein Typ.
+
+Eine weitere Möglichkeit ist es zwei oder mehrere existierende Typen zu verbinden. Dies nennt sich ein Union-Type. Hier ein Beispiel:
+```typescript
+type numberLike = boolean|number;
+```
+Das heißt eine Funktion mit diesem Parameter kann entweder mit jeder beliebigen Zahl aufgerufen werden oder mit einem `boolean`. Das ist aber ein eher seltener Fall.
+
+
+[]
+
+## Kapitel 5: Erweiterung des Klassensyntax
+Der nächst-einfachere Variante ist eine Klasse. Wie schon im ES6 Standard enthalten hat Javascript einen Klassen Syntax.
+```typescript
+class Ente {
+    public construct() {
+
+    }
+
+    public quack(): void {
+        console.log("Quack");
+    }
+}
+```
+Da hat sich mit Typescript aber auch noch etwas geändert: Wie in vielen anderen Programmiersprachen auch haben Methoden und Eigenschaften in einer Klasse jetzt Zugriffsmodifikatoren. `public`, `protected` und `private`:
+* `public`: Jeder hat auf die Methode bzw. Eigenschaft Zugriff.
+* `protected`: Wenn eine Klasse erbt, dann hat sie Zugriff auf die `protected` Eigenschaften und Methoden der Kind Klasse, aber kein anderer.
+* `private`: Nur Funktionen und Methoden innerhalb der gleichen Klasse haben Zugriff auf die Eigenschaften und Methoden.
+
+[]
