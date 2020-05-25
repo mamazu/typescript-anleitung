@@ -1,4 +1,4 @@
-#Typescript für Einsteiger
+# Typescript für Einsteiger
 Dieses Dokument soll die Grundlagen von Typescript darstellen und ihre Anwendungsfälle.
 
 Kurz was zu meiner Person: Ich bin seit 5 Jahren (2015) PHP Entwickler. Eine Programmiersprache die sich auch lange Zeit mit Typisierung schwer getan hat. Aber ich habe auch Erfahrungen mit typisierten Sprachen wie C++ und Java und kann sagen, typensichere Programmierung hat mehr Vorteile als Nachteile.
