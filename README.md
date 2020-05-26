@@ -1,14 +1,12 @@
 # Typescript für Einsteiger
 Dieses Dokument soll die Grundlagen von Typescript darstellen und ihre Anwendungsfälle.
 
-Kurz was zu meiner Person: Ich bin seit 5 Jahren (2015) PHP Entwickler. Eine Programmiersprache die sich auch lange Zeit mit Typisierung schwer getan hat. Aber ich habe auch Erfahrungen mit typisierten Sprachen wie C++ und Java und kann sagen, typensichere Programmierung hat mehr Vorteile als Nachteile.
-
-Vorteile sind Typensicherheit und damit einhergehend bessere Auto-Vervollständigung. Was genau das heißt darauf kommen wir später noch mal zu sprechen in Kapitel 3. Offensichtliche Nachteile sind zum einen die Tatsache dass es nicht von Javascript nativ unterstützt wird und deswegen mehr Aufwand in der Entwicklung ist das Projekt korrekt aufzusetzen. Und zum anderen kann es manchmal ziemlich anstrengend sein Typen-korrekt zu arbeiten. Aber auch dafür hat Typescript eine Lösung `any`. Mehr dazu in Kapitel 2.
+Ich bin seit 5 Jahren PHP Entwickler und daher sind die Anwendungsbeispiele ein bisschen theoretisch hoffe aber trotzdem dass sie veranschaulichen, wie Typescript funktioniert und was für Vorteile es hat.
 
 ## Kapitel 0: Die Motivation
-Javascript ist eine sehr populäre Sprache für den Bau von Webseiten geworden. Ein treibender Faktor sind sicherlich die reiche Auswahl an Frameworks wie Angular, React, View und noch viele mehr. Aber auch eine Website die ohne Framework auskommen kann braucht für zum Beispiel interaktives Formular validieren Javascript.
+Javascript ist eine sehr populäre Sprache für den Bau von Webseiten geworden. Sollte man jedoch keine eigenen Lösungen bauen sondern ein Framework benutzen wird die Sprache meistens vorgegeben. Die meisten Frameworks wie Angular, React und View heutzutage benutzen schon Typescript. Jedoch bei kleineren Projekten wird meist immer noch auf Javascript gesetzt weil das integrieren von Typescript in den workflow nicht ganz so einfach ist wie es scheint.
 
-Das Problem daran ist, dass Javascript eine ziemlich anstrengende Sprache sein kann wenn man mit ihr versucht Sachen zu debuggen. Hier mal ein Beispiel:
+Jedoch eins der Probleme die an Javascript selber sehr schnell klar werden ist, dass dies nicht sehr Entwickler-freundlich ist und mache Sachen sind schwer zu debuggen. Hier mal ein Beispiel:
 
 ```javascript
 // Angenommen `element` ist ein Element auf der Website
@@ -34,7 +32,7 @@ add(1, '1');
 Wie können wir sicher stellen, dass das nur das tut was wir wollen? Der zweite Aufruf ist nicht, gültig. Man kann das in dem Falle ziemlich einfach verhindern in dem man sagt: Konvertiere in der Funktion alles was keine Zahl ist in eine Zahl. Das macht aber das Problem nur noch komplizierter, denn dann müssen wir uns auch noch mit dem Fall beschäftigen, was passiert wenn eine oder beide der Parameter nicht in eine Zahl umwandelbar sind. Eine einfache Antwort dazu wäre dann gibt die Funktion `NaN` zurück. Aber das wollen wir nicht. Was wir wollen ist das:
 ```javascript
 function add(x, y) {
-    if (typeof(x) === 'number' && typeof(y) === 'number) {
+    if (typeof(x) === 'number' && typeof(y) === 'number') {
         return x + y;
     }
 }
@@ -51,7 +49,7 @@ Wir wollen in der Funktion nur eine Addition durchführen, wenn sowohl `x` und `
 Um unsere Funktion also nach dieser Definition anzupassen sieht sie so aus.
 ```javascript
 function add(x, y) {
-    if (typeof(x) === 'number' && typeof(y) === 'number) {
+    if (typeof(x) === 'number' && typeof(y) === 'number') {
         return x + y;
     }
     throw new Error('Parameters need to be numbers');
@@ -223,7 +221,7 @@ Wie schon im ES6 Standard enthalten hat Javascript einen Klassen Syntax.
 ```typescript
 class Duck {
     public quack(): void {
-        console.log("Quack");
+        console.log('Quack');
     }
 }
 ```
@@ -319,11 +317,13 @@ Diese Konstante hat jetzt den Typ `HTMLElement|null` weil es kann sein, dass das
 ```typescript
 const element = document.getElementById('someId') as HTMLElement;
 ```
+
 Damit geben wir den Typ des Ausdrucks auf der rechten Seite vor. Das ganze Beispiel ist folgendes:
 ```typescript
 const element = document.getElementById('someId') as HTMLElement;
 element.style = {position: "absolute", height: "100px", width: "10px"};
 ```
+
 In Javascript wäre das kein Problem. Aber es macht nicht dass was es soll. Das Element hat kein neuen Style. Die Fehlermeldung von Typescript sagt warum: `Cannot assign to 'style' because it is a read-only property.`
 
 ### Anwendungsfall für `Enum`s
@@ -355,10 +355,37 @@ Diese Funktion gibt nun zu jedem Zustand der Ampel einen String aus. Es gibt nun
 Typescript kann natürlich noch so viel mehr als das was gerade beschrieben wurde. Ein paar der etwas komplizierteren Themen sollen hier nur mal kurz angeschnitten werden.
 
 ### Template Types aka. Generics
+Einen Datentyp den wir uns noch nicht genauer angeschaut haben sind `Array`s. Eine Typendefinition von einem Array kann zwei unterschiedliche Erscheinungsbilder haben. Entweder schreibt man es mit `number[]` oder mit `Array<number>`. Die zweite Schreibweise verdeutlicht wie genau das gemeint ist. Denn der Typ `Array` hat einen Parameter, das was in den spitzen Klammern.
+
+Das ist das Grundkonzept von Generics. Wir haben eine Generische Klasse zu Beispiel ein Array, die einfach nur das Konzept von einer Liste abbildet. Und dann mit einem weiteren Typen `number` zu einer Liste an Zahlen wird.
 
 ### Iterator und Generator
+Iteratoren und Generatoren sind Konzepte die es auch schon in Javascript gibt. In Typescript werden die zusammen mit Generics zu einem sehr mächtigen Tool. Hier mal ein einfaches Beispiel
+```typescript
+function* getPaginatedUrls(): Generator<string> {
+    for (let page = 1; page < 100; page++) {
+        yield `http://someurl/some-resource?page=${page}`;
+    }
+}
+
+for(let url of getPaginatedUrls()) {
+    console.log(url);
+}
+```
 
 ### Decorators
+Das ist ein experimentelles Feature von Typescript. Das erlaubt es einem Funktionen durch einfaches davor schreiben von einem Ausdruck zu ändern:
+```
+@logging
+function doSomething(): void
+{
+}
+```
+Wenn die Funktion logging ein `console.log` vor und nach der Ausführung von `doSomething` schreibt kann man so ganz einfach jede Funktion mit der `@logging` Dekoration versehen und ganz einfach vieles loggen. Mehr dazu [in der Dokumentation](https://www.typescriptlang.org/docs/handbook/decorators.html).
 
 ## Kapitel 8: Schlusswort
+Typescript ist ein mächtiges Tool und es kann manchmal auch nervenaufreibend sein es zufrieden zu stellen aber dafür kann man sicher sein, dass die einzigen Fehler im Code Logikfehler sind und nicht irgendwelche fehlenden Eigenschaften.
 
+Egal ob man mit Typescript neu anfängt oder ein großes Projekt portieren darf: Es ist wichtig dass man sich die Compiler Flag anschaut die Typescript hat. Für neue Projekte alle Compiler Flags anmachen um striktere Checks zu bekommen und gar nicht erst die Fehler machen. Die großen legacy Projekte können von der `--allow-js` Funktion Gebrauch machen und Stück für Stück migrieren.
+
+Alles in allem definitiv eine Bereicherung für jeden Frontend-Entwickler und ein Tool, das ich nicht mehr missen möchte.
