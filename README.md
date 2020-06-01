@@ -13,7 +13,7 @@ Jedoch eins der Probleme die an Javascript selber sehr schnell klar werden ist, 
 element.style.height = document.height / 2 + "px";
 ```
 
-Das Element wird nicht auf die Hälfte der Seite vergrößert. Bei genauerem hinschauen wird man feststellen dass die Höhe des Elements `NaNpx` ist aber warum? Weil `document.height` nicht definiert ist. Schaut man sich an was `document.height` für einen Wert hat sieht man `undefined`. Was ist das? Das heißt an dem Objekt `window` ist keine Eigenschaft `height` definiert. Aber damit weiter zu arbeiten ist in Javascript kein Problem. `undefined / 2` ist dann `NaN` (also keine Zahl). 
+**Das Element ändert nicht seine Größe.** Bei genauerem hinschauen wird man feststellen dass die Höhe des Elements `NaNpx` ist aber warum? Weil `document.height` nicht definiert ist. Schaut man sich an was `document.height` für einen Wert hat sieht man `undefined`. Was ist das? Das heißt an dem Objekt `window` ist keine Eigenschaft `height` definiert. Aber damit weiter zu arbeiten ist in Javascript kein Problem. `undefined / 2` ist dann `NaN` (also keine Zahl). 
 
 Also um das noch einmal zusammen zu fassen: Der Ausdruck `document.height / 2 + "px"` macht aus einer `undefined` Eigenschaft wenn man durch eine Zahl teilt ein Wert der keine Zahl ist und schlussendlich kommt doch wieder ein String raus weil alles + einen String ist ein String. Aber was wir eigentlich wollten war die Höhe des Dokuments durch zwei als Pixelwert. Mit Typescript wäre das nicht passiert.
 
@@ -25,8 +25,8 @@ function add(x, y) {
     return x + y;
 }
 
-add(10, 20);
-add(1, '1');
+add(10, 20); // 30 (als Number)
+add(1, '1'); // '11'
 ```
 
 Wie können wir sicher stellen, dass das nur das tut was wir wollen? Der zweite Aufruf ist nicht, gültig. Man kann das in dem Falle ziemlich einfach verhindern in dem man sagt: Konvertiere in der Funktion alles was keine Zahl ist in eine Zahl. Das macht aber das Problem nur noch komplizierter, denn dann müssen wir uns auch noch mit dem Fall beschäftigen, was passiert wenn eine oder beide der Parameter nicht in eine Zahl umwandelbar sind. Eine einfache Antwort dazu wäre dann gibt die Funktion `NaN` zurück. Aber das wollen wir nicht. Was wir wollen ist das:
@@ -41,7 +41,7 @@ Wir wollen in der Funktion nur eine Addition durchführen, wenn sowohl `x` und `
 
 **Nein**, damit haben wir zwei neue Probleme erzeugt:
 1. Wenn `x` oder `y` keine Zahl ist, gibt diese Funktion `undefined` zurück. (Damit kann man auch nicht weiter rechnen.)
-2. Von außen können wir nicht sehen wie Funktion benutzt werden soll. Wir sehen nur zwei Parameter. Erst in der Funktion wird klar, dass es Zahlen sein müssen.
+2. Von außen können wir nicht sehen welche Arten von Parametern eingeben werden können / sollen. Wir sehen nur zwei Parameter. Erst in der Funktion wird klar, dass es Zahlen sein müssen.
 
 > Kleiner mathematischer Einschub: Viele Konzepte aus der Programmierung sind aus der Mathematik entlehnt bzw. sehr ähnlich. In der Mathematik ist eine Funktion so definiert: Eine Funktion f macht aus Werten in der Definitionsmenge Werte in der Wertemenge (auch Zielmenge). Also ein Beispiel die Funktion f: x + y würde aus zwei Natürlichen Zahlen x und y eine neue Natürliche Zahl machen. Und genau dieses Typensystem: Zahl + Zahl = Zahl wollen wir jetzt auch in Javascript haben. 
 > Einschub Ende.
@@ -60,7 +60,9 @@ Aber allgemein beleibt dann immer noch Problem Nummer 2: Wir können nicht von a
 ## Kapitel 2: Erste Schritte mit Typescript
 Für die Leute, die ein bisschen mit Typescript experimentieren wollen: [Hier ist die Sandbox](https://www.typescriptlang.org/play/)
 
-Wir werden in diesem Dokument nicht darauf eingehen wie man Typescript in jeweilige Projekte integriert. In vielen Frameworks ist es schon drin und in selbstgebauten Projekten eignet sich ein Compiler wie Babel oder ähnliches dafür. Aber da Typescript den Javascript Syntax erweitert ist es kein Problem den Typescript Compiler über ein Javascript Projekt laufen zu lassen. Damit hat man nur nicht viel erreicht, weil in Javascript nur sehr wenig Typisierungsinformation gesammelt werden kann. Das Typescript aber auch Javascript Dateien im Projekt erlaubt macht die Migration eines existierenden Projekts einfacher.
+> Im allgemeinen Funktioniert Typescript so: Typescript ist einfach nur Javascript mit Typen. Um aus dem Typescript Code gültiges Javascript zu machen wird ein Compiler eingesetzt. Dieser muss im Projekt installiert werden und der wandelt Typescript in Javascript um. So kann man typensicher entwickeln und der Browser muss nur Javascript unterstützen.
+
+In diesem Dokument wird nicht darauf ein gegangen wie man Typescript in jeweilige Projekte integriert. In vielen Frameworks ist es schon drin und in selbstgebauten Projekten eignet sich ein Compiler wie Babel oder ähnliches dafür. Aber da Typescript den Javascript Syntax erweitert ist es kein Problem den Typescript Compiler über ein Javascript Projekt laufen zu lassen. Damit hat man nur nicht viel erreicht, weil in Javascript nur sehr wenig Typisierungsinformation gesammelt werden kann. Das Typescript aber auch Javascript Dateien im Projekt erlaubt macht die Migration eines existierenden Projekts einfacher.
 
 Um die Funktion von dem vorherigen Kapitel wieder aufzugreifen, so würde sie in Typescript aussehen:
 ```typescript
@@ -78,21 +80,22 @@ function div(x: number, y: number): number {
 ```
 Was ist der Fehler an dieser Funktion? Richtig, wenn `y` gleich null ist, dann gibt diese Funktion `undefined` zurück und verletzt damit den Typ `number`. Der Compiler gibt dann eine Warnung aus: `Function lacks ending return statement and return type does not include 'undefined'.` 
 
-Also der Fehler der mit Javascript erst durch ausführen der Funktion mit `y` gleich null aufgefallen ist, fällt jetzt sofort beim Schreiben der Funktion auf. Ein ähnlicher Fehler tritt auf wenn man versucht eine Funktion aufzurufen, wenn die Parameter nicht übereinstimmen.
+Also der Fehler der mit Javascript erst durch ausführen der Funktion mit `y` gleich null aufgefallen ist, fällt jetzt sofort beim kompilieren der Funktion auf. Ein ähnlicher Fehler tritt auf wenn man versucht eine Funktion aufzurufen, wenn die Parameter nicht übereinstimmen.
 
 Zum Beispiel wenn wir die Funktion `add` mit einem String aufrufen kommt folgender Fehler: `Argument of type '"1"' is not assignable to parameter of type 'number'.` Das macht entwickeln ziemlich einfach.
 
-Aber was für Typen gibt es denn eigentlich?
+Aber was für native Typen gibt es denn eigentlich?
 
  * `number` (Zahlen)
  * `string` (mit einzelnen und doppelte Anführungsstriche)
- * `object` (Damit meint man nur das leere Objekt)
+ * `object` (Damit meint man nur das leere Objekt: Ein Objekt ohne Eigenschaften)
  * `boolean` (`true` oder `false`)
  * `enum` (Im Prinzip sind das benannte Konstanten)
  * `void` (als Rückgabewert von Funktion heißt das "Diese Funktion gibt nichts zurück" das heißt auch dass man den Wert den die Funktion zurück gibt nicht verwenden kann.)
  * `Array` und `tuple` (Mehr dazu im Kapitel über Container Typen)
  * Konstante Literale sind auch erlaubt: `null`, `undefined`
 
+Ein Beispiel wie man konstante Literale einsetzen könnte wäre die folgende Funktion:
 ```typescript
 function howOldAmI(age: 'old'|'young'|'very old'): string {
     return 'You are ' + age;
@@ -100,8 +103,9 @@ function howOldAmI(age: 'old'|'young'|'very old'): string {
 ```
 Das heißt gültige Werte für diese Funktion sind der String "old", "young" oder "very old" und kein anderer `String`.
 
+
 Besondere Typen:
-* `never`: Diese Funktion gibt nie irgendwas zurück, sondern schmeißt nur `Exception`s)
+* `never`: Diese Funktion gibt nie irgendwas zurück, sondern schmeißt nur `Exception`s
 * `any`: Wenn man den Type angeben will aber in explizit wage lässt.
 
 Eine weitere Sache die noch wichtig zu verstehen ist, ist wo überall man Typen angeben kann:
@@ -123,11 +127,11 @@ if (a === 0) {
 ```typescript
 let f = someExternalFunction() as string;
 ```
-Das setzt den Typ für die Variable `f` auf `string`. Sollte das nicht mit dem eigentlichen Rückgabewert übereinstimmen, ist das egal. Da beim Überführen des Typescript Codes zu reinem Javascript die Typen Definitionen weg gelassen werden.
+Das setzt den Typ für die Variable `f` auf `string`. Sollte der eigentlichen Rückgabewert nicht kompatibel mit `string` sein, wird einen der Compiler darauf hinweisen jedoch ist dies valider Code. Da im Browser das kompilierte Javascript ausgeführt wird, was diese Typeninformationen nicht enthält, kommt es da zu keinen Problemen.
 
 
 ## Kapitel 3: Wie funktioniert das Typsystem
-Das Typsystem von Typescript bzw. Javascript damit indirekt auch ist strukturelle Typisierung oder auch [Duck-Typing](https://de.wikipedia.org/wiki/Duck-Typing) genannt.
+Das Typsystem von Typescript bzw. Javascript wird strukturelle Typisierung oder auch [Duck-Typing](https://de.wikipedia.org/wiki/Duck-Typing) genannt.
 ```typescript
 let test1 = { test: true }
 let test2 = { test: false }
@@ -145,7 +149,7 @@ class Test1 {
 
 class Test2 extends Test1 {
     num: number;
-}
+
 ```
 Mehr zum Klassensyntax in Kapitel 5.
 
@@ -165,7 +169,7 @@ function
 ```
 
 ## Kapitel 4: Typen selber erstellen
-Typen kann man in Typescript überall definieren. Für zentrale Typen, die man überall in dem Projekt braucht eignet sich eine sogenannte [Definitionsdatei](https://www.typescriptlang.org/docs/handbook/declaration-files/by-example.html) mit der Endung `.d.ts`.
+Typen kann man in Typescript überall definieren. Für zentrale Typen, die man überall in dem Projekt braucht eignet sich eine sogenannte [Definitionsdatei](https://www.typescriptlang.org/docs/handbook/declaration-files/by-example.html) mit der Endung `.d.ts`. Was vereinfacht gesagt eine Typescript Datei ist, die nur Typendefinitionen enthält und keinen Code.
 
 #### Aus Klassen und Objekten
 Die einfachste Art einen Typ anzulegen ist eine Klasse zu definieren, denn jede Klasse ist ein Typ. Wenn man von einem bereits existierenden Objekt den Typ übernehmen will, kann man das machen mit dem `typeof` Schlüsselwort.
@@ -217,7 +221,7 @@ console.log(getLength(someObject));
 Dieses Programm schreibt `10` in die Konsole. Dies mag zwar auf den ersten Blick nicht sehr sinnvoll aussehen und man fragt sich warum man das machen sollte, das ist bei APIs ziemlich hilfreich. Mehr dazu in Kapitel 6.
 
 ## Kapitel 5: Erweiterung des Klassensyntax
-Wie schon im ES6 Standard enthalten hat Javascript einen Klassen Syntax.
+Wie schon im [ES6](http://es6-features.org/#Constants) Standard enthalten hat Javascript einen Klassen Syntax.
 ```typescript
 class Duck {
     public quack(): void {
@@ -259,9 +263,9 @@ class Car {
     ) { }
 }
 ```
-Das Konzept von "Eigenschaften müssen im Vorfeld bekannt sein" ändert ein Stück weit auch das Objektmodel. Nun ist es nicht mehr möglich ist neue Eigenschaften dynamisch hinzufügen, zumindest nicht direkt.
+Das Konzept von "Eigenschaften müssen im Vorfeld bekannt sein" ändert ein Stück weit auch das Objektmodel. Nun ist es nicht mehr möglich neue Eigenschaften dynamisch hinzufügen, zumindest nicht direkt.
 ```typescript
-class AllObjects{
+class AllObjects {
     [key: string]: any;
 
     // Rest der Klasse hier
@@ -306,7 +310,7 @@ fetch('https://some-url-that-does-return-stuff.com/users')
         // Die Logik hier!
     })
 ```
-In diesem Beispiel wird die [Fetch Funktion](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) verwendet. Aber nichts desto trotz ohne die eigentliche API je gesehen zu haben kann man jetzt Typen-sicher programmieren mit Autovervollständigung. Und wenn man das zentral in einer Typ-Datei speichert, hat man auf diese Typen im ganzen Projektzugriff.
+In diesem Beispiel wird die [Fetch Funktion](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) verwendet. Aber nichts desto trotz ohne die eigentliche API je gesehen zu haben kann man jetzt Typen-sicher programmieren mit Autovervollständigung. Und wenn man das zentral in einer Typendatei speichert, hat man auf diese Typen im ganzen Projektzugriff.
 
 ### Typescript hat auch Types für DOM-Objekte
 Ein weiteres Beispiel für Hilfe bei der DOM Manipulation:
@@ -355,7 +359,7 @@ Diese Funktion gibt nun zu jedem Zustand der Ampel einen String aus. Es gibt nun
 Typescript kann natürlich noch so viel mehr als das was gerade beschrieben wurde. Ein paar der etwas komplizierteren Themen sollen hier nur mal kurz angeschnitten werden.
 
 ### Template Types aka. Generics
-Einen Datentyp den wir uns noch nicht genauer angeschaut haben sind `Array`s. Eine Typendefinition von einem Array kann zwei unterschiedliche Erscheinungsbilder haben. Entweder schreibt man es mit `number[]` oder mit `Array<number>`. Die zweite Schreibweise verdeutlicht wie genau das gemeint ist. Denn der Typ `Array` hat einen Parameter, das was in den spitzen Klammern.
+Einen Datentyp den wir uns noch nicht genauer angeschaut haben sind `Array`s. Eine Typendefinition von einem Array kann zwei unterschiedliche Erscheinungsbilder haben. Entweder schreibt man es mit `number[]` oder mit `Array<number>`. Die zweite Schreibweise verdeutlicht wie genau das gemeint ist. Denn der Typ `Array` hat einen Parameter, das was in den spitzen Klammern steht.
 
 Das ist das Grundkonzept von Generics. Wir haben eine Generische Klasse zu Beispiel ein Array, die einfach nur das Konzept von einer Liste abbildet. Und dann mit einem weiteren Typen `number` zu einer Liste an Zahlen wird.
 
@@ -381,11 +385,14 @@ function doSomething(): void
 {
 }
 ```
-Wenn die Funktion logging ein `console.log` vor und nach der Ausführung von `doSomething` schreibt kann man so ganz einfach jede Funktion mit der `@logging` Dekoration versehen und ganz einfach vieles loggen. Mehr dazu [in der Dokumentation](https://www.typescriptlang.org/docs/handbook/decorators.html).
+Wenn der Decoration `@logging` ein `console.log` vor und nach der Ausführung von `doSomething` schreibt, kann man jeden Funktionsaufruf mit `@logging` dekorieren und damit loggen. Mehr dazu [in der Dokumentation](https://www.typescriptlang.org/docs/handbook/decorators.html).
 
 ## Kapitel 8: Schlusswort
-Typescript ist ein mächtiges Tool und es kann manchmal auch nervenaufreibend sein es zufrieden zu stellen aber dafür kann man sicher sein, dass die einzigen Fehler im Code Logikfehler sind und nicht irgendwelche fehlenden Eigenschaften.
+Typescript ist ein mächtiges Tool und es kann manchmal auch nervenaufreibend sein es zufrieden zu stellen. Dafür kann man sicher sein, dass die einzigen Fehler im Code Logikfehler sind und nicht irgendwelche fehlenden Eigenschaften.
 
-Egal ob man mit Typescript neu anfängt oder ein großes Projekt portieren darf: Es ist wichtig dass man sich die Compiler Flag anschaut die Typescript hat. Für neue Projekte alle Compiler Flags anmachen um striktere Checks zu bekommen und gar nicht erst die Fehler machen. Die großen legacy Projekte können von der `--allow-js` Funktion Gebrauch machen und Stück für Stück migrieren.
+Egal ob man mit Typescript neu anfängt oder ein großes Projekt portieren darf: Es ist wichtig dass man sich die Compiler Flag anschaut die Typescript hat. 
+
+* Für neue Projekte: Alle Compiler Flags anmachen um striktere Checks zu bekommen und gar nicht erst schlecht zu typisieren.
+* Für große legacy Projekte: Einschalten der `--allow-js` Funktion um Typescript und Javascript nebeneinander benutzen zu können. Das ermöglicht auch eine Migration Stück für Stück.
 
 Alles in allem definitiv eine Bereicherung für jeden Frontend-Entwickler und ein Tool, das ich nicht mehr missen möchte.
